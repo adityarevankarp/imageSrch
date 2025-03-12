@@ -1,0 +1,388 @@
+{
+	"info": {
+		"_postman_id": "pdf-image-search",
+		"name": "PDF Image Search API",
+		"description": "API endpoints for PDF Image Search System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Documents",
+			"item": [
+				{
+					"name": "Upload Document",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/your/test.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/documents/upload",
+							"host": ["{{base_url}}"],
+							"path": ["api", "documents", "upload"]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test('Response has required fields', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('message');",
+							"    pm.expect(response).to.have.property('document');",
+							"    pm.expect(response.document).to.have.property('id');",
+							"    pm.expect(response.document).to.have.property('filename');",
+							"    pm.expect(response.document).to.have.property('status');",
+							"});",
+							"",
+							"if (pm.response.code === 201) {",
+							"    pm.environment.set('document_id', pm.response.json().document.id);",
+							"}"
+						]
+					}
+				},
+				{
+					"name": "Get Document by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/documents/{{document_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "documents", "{{document_id}}"]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has required fields', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('_id');",
+							"    pm.expect(response).to.have.property('filename');",
+							"    pm.expect(response).to.have.property('status');",
+							"    pm.expect(response).to.have.property('processingProgress');",
+							"});"
+						]
+					}
+				},
+				{
+					"name": "List Documents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/documents?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "documents"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has pagination', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('documents');",
+							"    pm.expect(response).to.have.property('pagination');",
+							"    pm.expect(response.pagination).to.have.property('current');",
+							"    pm.expect(response.pagination).to.have.property('pages');",
+							"    pm.expect(response.pagination).to.have.property('total');",
+							"});"
+						]
+					}
+				},
+				{
+					"name": "Delete Document",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/documents/{{document_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "documents", "{{document_id}}"]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Document deleted successfully', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('message');",
+							"    pm.expect(response.message).to.equal('Document deleted successfully');",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "Text Search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/search/text?q=example&page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "search", "text"],
+							"query": [
+								{
+									"key": "q",
+									"value": "example"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has search results', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('results');",
+							"    pm.expect(response).to.have.property('pagination');",
+							"});",
+							"",
+							"pm.test('Results have required fields', function () {",
+							"    const response = pm.response.json();",
+							"    if (response.results.length > 0) {",
+							"        const firstResult = response.results[0];",
+							"        pm.expect(firstResult).to.have.property('documentId');",
+							"        pm.expect(firstResult).to.have.property('pageNumber');",
+							"        pm.expect(firstResult).to.have.property('analysis');",
+							"    }",
+							"});"
+						]
+					}
+				},
+				{
+					"name": "Content Search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/search/content?object=car&page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "search", "content"],
+							"query": [
+								{
+									"key": "object",
+									"value": "car"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has search results', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('results');",
+							"    pm.expect(response).to.have.property('pagination');",
+							"});",
+							"",
+							"pm.test('Results have required fields', function () {",
+							"    const response = pm.response.json();",
+							"    if (response.results.length > 0) {",
+							"        const firstResult = response.results[0];",
+							"        pm.expect(firstResult).to.have.property('documentId');",
+							"        pm.expect(firstResult).to.have.property('pageNumber');",
+							"        pm.expect(firstResult).to.have.property('analysis');",
+							"        pm.expect(firstResult.analysis).to.have.property('objects');",
+							"    }",
+							"});"
+						]
+					}
+				},
+				{
+					"name": "Search Suggestions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/search/suggestions?q=car",
+							"host": ["{{base_url}}"],
+							"path": ["api", "search", "suggestions"],
+							"query": [
+								{
+									"key": "q",
+									"value": "car"
+								}
+							]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has suggestions array', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('suggestions');",
+							"    pm.expect(response.suggestions).to.be.an('array');",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Error Cases",
+			"item": [
+				{
+					"name": "Upload Invalid File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/your/invalid.txt"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/documents/upload",
+							"host": ["{{base_url}}"],
+							"path": ["api", "documents", "upload"]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 400', function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test('Error message is present', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('error');",
+							"});"
+						]
+					}
+				},
+				{
+					"name": "Get Non-existent Document",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/documents/000000000000000000000000",
+							"host": ["{{base_url}}"],
+							"path": ["api", "documents", "000000000000000000000000"]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 404', function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test('Error message is present', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('error');",
+							"    pm.expect(response.error).to.equal('Document not found');",
+							"});"
+						]
+					}
+				},
+				{
+					"name": "Search Without Query",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/search/text",
+							"host": ["{{base_url}}"],
+							"path": ["api", "search", "text"]
+						}
+					},
+					"test": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('Status code is 400', function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test('Error message is present', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('error');",
+							"    pm.expect(response.error).to.equal('Search query is required');",
+							"});"
+						]
+					}
+				}
+			]
+		}
+	]
+} 
