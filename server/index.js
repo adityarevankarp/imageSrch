@@ -31,7 +31,9 @@ redisClient.on('connect', () => {
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: config.client.url,
+  origin: process.env.NODE_ENV === 'production' 
+    ? config.client.url 
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true
 }));
 

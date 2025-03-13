@@ -1,6 +1,7 @@
 const vision = require('@google-cloud/vision');
 const path = require('path');
 const fs = require('fs').promises; // Change to promises version for async/await
+const KeywordMap = require('../models/KeywordMap');
 
 class VisionService {
   constructor() {
@@ -97,6 +98,57 @@ class VisionService {
 
       // Extract safe search
       const safeSearch = safeSearchResult[0].safeSearchAnnotation;
+
+      // Collect all keywords and their metadata
+      const keywords = new Set();
+      const keywordMeta = [];
+
+      // Add labels
+      labelResult[0].labelAnnotations.forEach(label => {
+        keywords.add(label.description.toLowerCase());
+        keywordMeta.push({
+          keyword: label.description.toLowerCase(),
+          type: 'label',
+          confidence: label.score
+        });
+      });
+
+      // Add objects
+      objectResult[0].localizedObjectAnnotations.forEach(obj => {
+        keywords.add(obj.name.toLowerCase());
+        keywordMeta.push({
+          keyword: obj.name.toLowerCase(),
+          type: 'object',
+          confidence: obj.score
+        });
+      });
+
+      // Add detected text keywords (split by spaces and filter out short words)
+      text.split(/\s+/)
+        .filter(word => word.length > 2) // Filter out short words
+        .forEach(word => {
+          const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '');
+          if (cleanWord) {
+            keywords.add(cleanWord);
+            keywordMeta.push({
+              keyword: cleanWord,
+              type: 'text',
+              confidence: 1.0
+            });
+          }
+        });
+
+      // Store in KeywordMap
+      await KeywordMap.findOneAndUpdate(
+        { documentId, pageNumber: parseInt(filename.match(/page-(\d+)/)?.[1] || 1) },
+        {
+          documentId,
+          pageNumber: parseInt(filename.match(/page-(\d+)/)?.[1] || 1),
+          keywords: Array.from(keywords),
+          keywordMeta
+        },
+        { upsert: true, new: true }
+      );
 
       return {
         text,
