@@ -147,4 +147,33 @@ router.delete('/:id', async (req, res, next) => {
   }
 });
 
+// Get PDF file
+router.get('/:id/pdf', async (req, res, next) => {
+  try {
+    const document = await Document.findById(req.params.id);
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    const filePath = path.join('uploads/documents', document.filename);
+    
+    // Check if file exists
+    try {
+      await fs.access(filePath);
+    } catch (error) {
+      return res.status(404).json({ error: 'PDF file not found' });
+    }
+
+    // Set headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${document.originalName}"`);
+
+    // Stream the file
+    const fileStream = require('fs').createReadStream(filePath);
+    fileStream.pipe(res);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router; 

@@ -128,18 +128,18 @@ const Search = () => {
                   }
                 }}
               >
-                <ToggleButton value="keywords" aria-label="keywords search">
+                {/* <ToggleButton value="keywords" aria-label="keywords search">
                   <SearchIcon sx={{ mr: 1 }} />
                   Keywords
-                </ToggleButton>
-                <ToggleButton value="content" aria-label="content search">
+                </ToggleButton> */}
+                {/* <ToggleButton value="content" aria-label="content search">
                   <Image sx={{ mr: 1 }} />
                   Objects
                 </ToggleButton>
                 <ToggleButton value="text" aria-label="text search">
                   <TextFields sx={{ mr: 1 }} />
                   Text
-                </ToggleButton>
+                </ToggleButton> */}
               </ToggleButtonGroup>
             </Box>
           </Grid>
@@ -153,6 +153,7 @@ const Search = () => {
               size="large"
               sx={{ 
                 height: '56px',
+                width:'100px',
                 textTransform: 'none',
                 fontSize: '1.1rem'
               }}

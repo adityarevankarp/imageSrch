@@ -9,6 +9,7 @@ import Upload from './components/Upload';
 import Documents from './components/Documents';
 import Search from './components/Search';
 import DocumentView from './components/DocumentView';
+import PdfViewer from './components/PdfViewer';
 
 // Create theme
 const theme = createTheme({
@@ -30,9 +31,10 @@ function App() {
           <Navbar />
           <Routes>
             <Route path="/" element={<Documents />} />
+            <Route path="/documents" element={<Documents />} />
+            <Route path="/documents/:id" element={<PdfViewer />} />
             <Route path="/upload" element={<Upload />} />
             <Route path="/search" element={<Search />} />
-            <Route path="/documents/:id" element={<DocumentView />} />
           </Routes>
           <ToastContainer position="bottom-right" />
         </div>

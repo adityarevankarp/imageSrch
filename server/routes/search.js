@@ -7,18 +7,26 @@ const KeywordMap = require('../models/KeywordMap');
 // Keyword-based search
 router.get('/keywords', async (req, res, next) => {
   try {
-    const { q } = req.query;
+    const { q, documentId } = req.query;
 
     if (!q) {
       return res.status(400).json({ error: 'Search query is required' });
     }
 
-    // Search in KeywordMap
-    const results = await KeywordMap.find({
+    // Build search query
+    const searchQuery = {
       keywords: { $regex: new RegExp(q, 'i') }
-    })
-    .populate('documentId', 'originalName filename status')
-    .sort({ pageNumber: 1 });
+    };
+
+    // Add document filter if provided
+    if (documentId) {
+      searchQuery.documentId = documentId;
+    }
+
+    // Search in KeywordMap
+    const results = await KeywordMap.find(searchQuery)
+      .populate('documentId', 'originalName filename status')
+      .sort({ pageNumber: 1 });
 
     // Format results
     const formattedResults = results.map(result => {
